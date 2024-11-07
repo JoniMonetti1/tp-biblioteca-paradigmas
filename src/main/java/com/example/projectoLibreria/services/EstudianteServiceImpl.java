@@ -1,7 +1,12 @@
 package com.example.projectoLibreria.services;
 
 import com.example.projectoLibreria.models.Estudiante;
+import com.example.projectoLibreria.models.Libro;
+import com.example.projectoLibreria.models.Prestamo;
+import com.example.projectoLibreria.models.PrestamoDTO;
 import com.example.projectoLibreria.repositories.EstudianteRepository;
+import com.example.projectoLibreria.repositories.LibroRepository;
+import com.example.projectoLibreria.repositories.PrestamoRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -12,9 +17,13 @@ import java.util.Optional;
 public class EstudianteServiceImpl implements EstudianteService{
 
     private final EstudianteRepository estudianteRepository;
+    private final PrestamoRepository prestamoRepository;
+    private final LibroRepository libroRepository;
 
-    public EstudianteServiceImpl(EstudianteRepository estudianteRepository) {
+    public EstudianteServiceImpl(EstudianteRepository estudianteRepository, PrestamoRepository prestamoRepository, LibroRepository libroRepository) {
         this.estudianteRepository = estudianteRepository;
+        this.prestamoRepository = prestamoRepository;
+        this.libroRepository = libroRepository;
     }
 
     @Override
@@ -43,24 +52,36 @@ public class EstudianteServiceImpl implements EstudianteService{
     }
 
     @Override
-    public ResponseEntity<Estudiante> updateEstudiante(Long id, Estudiante estudiante) {
-        Optional<Estudiante> optionalEstudiante = estudianteRepository.findById(id);
-
-        if (optionalEstudiante.isPresent()) {
-            estudiante.setIdEstudiante(id);
-            Estudiante updatedEstudiante = estudianteRepository.save(estudiante);
-            return ResponseEntity.ok(updatedEstudiante);
-        }
-        return ResponseEntity.notFound().build();
-    }
-
-    @Override
     public ResponseEntity<Void> deleteEstudiante(Long id) {
         Optional<Estudiante> optionalEstudiante = estudianteRepository.findById(id);
 
         if (optionalEstudiante.isPresent()) {
             estudianteRepository.deleteById(id);
             return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public ResponseEntity<List<PrestamoDTO>> obtenerPrestamosPorEstudiante(Long idEstudiante) {
+        Optional<Estudiante> optionalEstudiante = estudianteRepository.findById(idEstudiante);
+        if (optionalEstudiante.isPresent()) {
+            List<Prestamo> prestamos = prestamoRepository.findByEstudianteId(idEstudiante);
+
+            if (prestamos.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            List<PrestamoDTO> listaDePrestamosDTO = prestamos.stream()
+                    .map(prestamo -> {
+                        String tituloLibro = libroRepository.findById(prestamo.getEjemplar().getIdLibro())
+                                .map(libro -> {
+                                    return libro.getTitulo();
+                                })
+                                .orElse("Libro no encontrado");
+                        return new PrestamoDTO(prestamo, tituloLibro);
+                    }).toList();
+
+            return ResponseEntity.ok(listaDePrestamosDTO);
         }
         return ResponseEntity.notFound().build();
     }

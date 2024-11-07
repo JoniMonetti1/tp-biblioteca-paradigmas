@@ -1,6 +1,7 @@
 package com.example.projectoLibreria.models;
 
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 @Entity

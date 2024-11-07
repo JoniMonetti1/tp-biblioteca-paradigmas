@@ -1,6 +1,9 @@
 package com.example.projectoLibreria.services;
 
+import com.example.projectoLibreria.models.Ejemplar;
 import com.example.projectoLibreria.models.Libro;
+import com.example.projectoLibreria.models.LibroDTO;
+import com.example.projectoLibreria.repositories.EjemplarRepository;
 import com.example.projectoLibreria.repositories.LibroRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -8,25 +11,39 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class LibroServiceImpl implements LibroService {
 
     private final LibroRepository libroRepository;
+    private final EjemplarRepository ejemplarRepository;
 
-    public LibroServiceImpl(LibroRepository libroRepository) {
+    public LibroServiceImpl(LibroRepository libroRepository, EjemplarRepository ejemplarRepository) {
         this.libroRepository = libroRepository;
+        this.ejemplarRepository = ejemplarRepository;
     }
 
     @Override
-    public ResponseEntity<List<Libro>> getLibros() {
+    public ResponseEntity<List<LibroDTO>> getLibros() {
         List<Libro> result = libroRepository.findAll();
-        return result.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(result);
+        List<LibroDTO> libroDTOS = result.stream()
+                .map(libro -> {
+                    long cantidadEjemplares = ejemplarRepository.countByLibroId(libro.getIdLibro());
+                    return new LibroDTO(libro, cantidadEjemplares);
+                })
+                .toList();
+        return libroDTOS.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(libroDTOS);
     }
 
     @Override
-    public ResponseEntity<Libro> getLibroById(Long id) {
+    public ResponseEntity<LibroDTO> getLibroById(Long id) {
         Optional<Libro> optionalLibro = libroRepository.findById(id);
-        return optionalLibro.isPresent()? ResponseEntity.ok(optionalLibro.get()) : ResponseEntity.notFound().build();
+        if(optionalLibro.isPresent()) {
+            Libro libro = optionalLibro.get();
+            long cantidadEjemplares = ejemplarRepository.countByLibroId(libro.getIdLibro());
+            return ResponseEntity.ok(new LibroDTO(libro, cantidadEjemplares));
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @Override
@@ -59,9 +76,32 @@ public class LibroServiceImpl implements LibroService {
         Optional<Libro> optionalLibro = libroRepository.findById(id);
 
         if (optionalLibro.isPresent()) {
+            ejemplarRepository.deleteByLibroId(id);
             libroRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @Override
+    public ResponseEntity<Ejemplar> agregarEjemplar(Long idLibro, Ejemplar ejemplar) {
+        Optional<Libro> optionalLibro = libroRepository.findById(idLibro);
+        if (optionalLibro.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Ejemplar nuevoEjemplar = Ejemplar.builder()
+                .idLibro(idLibro)
+                .esPrestado(false)
+                .build();
+        Ejemplar savedEjemplar = ejemplarRepository.save(nuevoEjemplar);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}/ejemplar")
+                .buildAndExpand(savedEjemplar.getIdEjemplar())
+                .toUri();
+
+        return ResponseEntity.created(location).body(savedEjemplar);
     }
 }

@@ -9,6 +9,7 @@ import java.util.List;
 public interface PrestamoService {
     ResponseEntity<List<Prestamo>> getPrestamos();
     ResponseEntity<Prestamo> getPrestamoById(Long id);
-    ResponseEntity<Prestamo> createPrestamo(Estudiante estudiante, Long idLibro);
+    ResponseEntity<Prestamo> createPrestamo(Long idEstudiante, Long idLibro, int diasDuracion);
     ResponseEntity<Void> deletePrestamoById(Long id);
+    ResponseEntity<Void> marcarDevolucion(Long idPrestamo);
 }

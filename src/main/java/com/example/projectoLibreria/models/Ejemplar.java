@@ -18,4 +18,7 @@ public class Ejemplar {
 
     @Column(name = "id_libro")
     private Long idLibro;
+
+    @Column(name = "es_prestado")
+    private Boolean esPrestado;
 }
