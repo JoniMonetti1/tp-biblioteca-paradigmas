@@ -13,5 +13,5 @@ public interface LibroService {
     ResponseEntity<Libro> saveLibro(Libro libro);
     ResponseEntity<Libro> updateLibro(Long id, Libro libro);
     ResponseEntity<Void> deleteLibro(Long id);
-    ResponseEntity<Ejemplar> agregarEjemplar(Long idLibro, Ejemplar ejemplar);
+    ResponseEntity<Ejemplar> agregarEjemplar(Long idLibro);
 }

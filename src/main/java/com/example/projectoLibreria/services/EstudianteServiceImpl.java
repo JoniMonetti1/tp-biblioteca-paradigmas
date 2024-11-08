@@ -1,20 +1,21 @@
 package com.example.projectoLibreria.services;
 
 import com.example.projectoLibreria.models.Estudiante;
-import com.example.projectoLibreria.models.Libro;
 import com.example.projectoLibreria.models.Prestamo;
 import com.example.projectoLibreria.models.PrestamoDTO;
 import com.example.projectoLibreria.repositories.EstudianteRepository;
 import com.example.projectoLibreria.repositories.LibroRepository;
 import com.example.projectoLibreria.repositories.PrestamoRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
-public class EstudianteServiceImpl implements EstudianteService{
+@Service
+public class EstudianteServiceImpl implements EstudianteService {
 
     private final EstudianteRepository estudianteRepository;
     private final PrestamoRepository prestamoRepository;
@@ -35,7 +36,7 @@ public class EstudianteServiceImpl implements EstudianteService{
     @Override
     public ResponseEntity<Estudiante> getEstudianteById(Long id) {
         Optional<Estudiante> optionalEstudiante = estudianteRepository.findById(id);
-        return optionalEstudiante.isPresent()? ResponseEntity.ok(optionalEstudiante.get()) : ResponseEntity.notFound().build();
+        return optionalEstudiante.isPresent() ? ResponseEntity.ok(optionalEstudiante.get()) : ResponseEntity.notFound().build();
     }
 
     @Override
@@ -73,7 +74,7 @@ public class EstudianteServiceImpl implements EstudianteService{
             }
             List<PrestamoDTO> listaDePrestamosDTO = prestamos.stream()
                     .map(prestamo -> {
-                        String tituloLibro = libroRepository.findById(prestamo.getEjemplar().getIdLibro())
+                        String tituloLibro = Optional.ofNullable(prestamo.getEjemplar().getLibro())
                                 .map(libro -> {
                                     return libro.getTitulo();
                                 })

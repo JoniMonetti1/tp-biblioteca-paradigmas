@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface LibroRepository extends JpaRepository<Libro, Long> {
-    @Query("SELECT DISTINCT l FROM Libro l JOIN Ejemplar e ON l.idLibro = e.idLibro WHERE e.esPrestado = false")
+    @Query("SELECT DISTINCT l FROM Libro l WHERE EXISTS (SELECT e FROM Ejemplar e WHERE e.libro = l AND e.esPrestado = false)")
     List<Libro> findLibrosDisponibles();
 }

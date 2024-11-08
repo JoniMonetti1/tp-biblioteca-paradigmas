@@ -1,5 +1,7 @@
 package com.example.projectoLibreria.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,9 +18,16 @@ public class Ejemplar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idEjemplar;
 
-    @Column(name = "id_libro")
-    private Long idLibro;
+    @JsonIgnoreProperties("ejemplares")
+    @ManyToOne
+    @JoinColumn(name = "id_libro")
+    private Libro libro;
 
     @Column(name = "es_prestado")
     private Boolean esPrestado;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @OneToOne(mappedBy = "ejemplar")
+    @JsonIgnoreProperties("ejemplar")
+    private Prestamo prestamo;
 }

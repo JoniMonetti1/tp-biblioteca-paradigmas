@@ -7,6 +7,7 @@ import com.example.projectoLibreria.repositories.EjemplarRepository;
 import com.example.projectoLibreria.repositories.EstudianteRepository;
 import com.example.projectoLibreria.repositories.PrestamoRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -15,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Service
 public class PrestamoServiceImpl implements PrestamoService {
     private final PrestamoRepository prestamoRepository;
     private final EjemplarRepository ejemplarRepository;
@@ -42,6 +44,7 @@ public class PrestamoServiceImpl implements PrestamoService {
     public ResponseEntity<Prestamo> createPrestamo(Long idEstudiante, Long idLibro, int diasDuracion) {
         Optional<Ejemplar> optionalEjemplar = ejemplarRepository.obtenerEjemplarDisponible(idLibro);
         Optional<Estudiante> optionalEstudiante = estudianteRepository.findById(idEstudiante);
+
         if (optionalEjemplar.isPresent() && optionalEstudiante.isPresent()) {
             Estudiante estudiante = optionalEstudiante.get();
             Ejemplar ejemplar = optionalEjemplar.get();

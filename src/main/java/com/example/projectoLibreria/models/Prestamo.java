@@ -1,5 +1,6 @@
 package com.example.projectoLibreria.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,7 +24,8 @@ public class Prestamo {
     private Estudiante estudiante;
 
     @OneToOne
-    @JoinColumn(name = "id_ejemplar", nullable = false, unique = true)
+    @JoinColumn(name = "id_ejemplar",  nullable = false, unique = true)
+    @JsonIgnoreProperties("prestamo")
     private Ejemplar ejemplar;
 
     @Column(name = "fecha_prestamo", nullable = false)
