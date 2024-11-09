@@ -14,4 +14,5 @@ public interface LibroService {
     ResponseEntity<Libro> updateLibro(Long id, Libro libro);
     ResponseEntity<Void> deleteLibro(Long id);
     ResponseEntity<Ejemplar> agregarEjemplar(Long idLibro);
+    ResponseEntity<List<Libro>> buscarLibros(String criterio, String valor);
 }

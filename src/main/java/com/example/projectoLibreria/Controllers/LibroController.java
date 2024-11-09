@@ -30,6 +30,12 @@ public class LibroController {
         return libroService.getLibroById(id);
     }
 
+    @GetMapping("/buscar")
+    @CrossOrigin
+    public ResponseEntity<List<Libro>> buscarLibros(@RequestParam String criterio, @RequestParam String valor) {
+        return libroService.buscarLibros(criterio, valor);
+    }
+
 
     @PostMapping
     @CrossOrigin

@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -18,8 +20,15 @@ public class LibroServiceImpl implements LibroService {
 
     private final LibroRepository libroRepository;
     private final EjemplarRepository ejemplarRepository;
+    private final Map<String, BusquedaLibroStrategy> strategies = new HashMap<>();
 
-    public LibroServiceImpl(LibroRepository libroRepository, EjemplarRepository ejemplarRepository) {
+    public LibroServiceImpl(LibroRepository libroRepository, EjemplarRepository ejemplarRepository,
+                            BuscarPorAutorStrategy porAutor,
+                            BuscarPorGeneroStrategy porGenero,
+                            BuscarPorTituloStrategy porTitulo) {
+        strategies.put("titulo", porTitulo);
+        strategies.put("autor", porAutor);
+        strategies.put("genero", porGenero);
         this.libroRepository = libroRepository;
         this.ejemplarRepository = ejemplarRepository;
     }
@@ -108,5 +117,14 @@ public class LibroServiceImpl implements LibroService {
                 .toUri();
 
         return ResponseEntity.created(location).body(savedEjemplar);
+    }
+
+    @Override
+    public ResponseEntity<List<Libro>> buscarLibros(String criterio, String valor) {
+        BusquedaLibroStrategy strategy = strategies.get(criterio.toLowerCase());
+        if (strategy == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(strategy.search(valor));
     }
 }
