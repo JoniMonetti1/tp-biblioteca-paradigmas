@@ -62,6 +62,8 @@ public class LibroServiceImpl implements LibroService {
     public ResponseEntity<Libro> saveLibro(Libro libro) {
         Libro savedLibro = libroRepository.save(libro);
 
+        crearEjemplarParaLibro(savedLibro);
+
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -104,19 +106,15 @@ public class LibroServiceImpl implements LibroService {
 
         Libro libro = optionalLibro.get();
 
-        Ejemplar nuevoEjemplar = Ejemplar.builder()
-                .libro(libro)
-                .esPrestado(false)
-                .build();
-        Ejemplar savedEjemplar = ejemplarRepository.save(nuevoEjemplar);
+        Ejemplar ejemplar = crearEjemplarParaLibro(libro);
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedEjemplar.getIdEjemplar())
+                .buildAndExpand(ejemplar.getIdEjemplar())
                 .toUri();
 
-        return ResponseEntity.created(location).body(savedEjemplar);
+        return ResponseEntity.created(location).body(ejemplar);
     }
 
     @Override
@@ -126,5 +124,13 @@ public class LibroServiceImpl implements LibroService {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(strategy.search(valor));
+    }
+
+    private Ejemplar crearEjemplarParaLibro(Libro libro) {
+        Ejemplar nuevoEjemplar = Ejemplar.builder()
+                .libro(libro)
+                .esPrestado(false)
+                .build();
+        return ejemplarRepository.save(nuevoEjemplar);
     }
 }
