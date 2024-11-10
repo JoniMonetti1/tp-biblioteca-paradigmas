@@ -157,6 +157,18 @@ Cuando marcas la devolucion se borra el prestamo y se pone el libro en esPrestad
 
 ---
 
+### GET - Buscar libro por atributo(titulo, genero o autor)
+
+`GET /system/api/v1/libros/buscar`
+
+**Query Params**
+
+`criterio=titulo autor o genero`
+
+`valor=coincidenciaBuscada`
+
+---
+
 ### POST - Crear libro
 
 `POST /system/api/v1/libros`
